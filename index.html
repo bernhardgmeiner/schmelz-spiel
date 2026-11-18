@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Schmelz-Spiel</title>
+  <meta name="theme-color" content="#1f3a4d">
+  <script type="module" crossorigin src="./assets/main-y-e380WM.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/code-BoTZ4eTZ.js">
+  <link rel="stylesheet" crossorigin href="./assets/main-B10Y3MqA.css">
+</head>
+<body>
+  <canvas id="welt"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-links">
+      <div class="zahl-box"><span id="hud-punkte">0</span> <small data-t="punkte"></small></div>
+      <div class="zahl-box"><span id="hud-stationen">0/0</span> <small data-t="stationen"></small></div>
+      <div id="hud-abzeichen" class="abzeichen-leiste"></div>
+    </div>
+    <div class="hud-rechts">
+      <button id="btn-abschluss" data-t="abschluss"></button>
+      <button id="btn-hilfe" aria-label="Hilfe">?</button>
+      <button id="btn-sprache"></button>
+    </div>
+  </div>
+
+  <div id="stick"><div></div></div>
+  <button id="aktion" hidden></button>
+  <div id="toast" aria-live="polite"></div>
+
+  <div id="start" class="vollbild">
+    <div class="karte">
+      <h1 data-t="titel"></h1>
+      <p class="unter" data-t="untertitel"></p>
+      <p id="start-paket"></p>
+      <div id="start-steuerung">
+        <h2 data-t="steuerungTitel"></h2>
+        <p id="start-steuerung-text"></p>
+        <p data-t="steuerungZiel"></p>
+      </div>
+      <div id="ladebalken"><div></div></div>
+      <p id="start-meldung" data-t="laden"></p>
+      <div class="knoepfe">
+        <button id="btn-start" class="haupt" data-t="start" disabled></button>
+        <button id="btn-sprache-start"></button>
+      </div>
+      <p class="credits">3D-Modell: 3D Warehouse „Grg15 Auf der Schmelz“, mit Erlaubnis des Erstellers · Prototyp</p>
+    </div>
+  </div>
+
+</body>
+</html>

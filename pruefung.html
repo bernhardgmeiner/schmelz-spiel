@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abschlusscodes prüfen</title>
+  <style>
+    :root { --dunkel: #1f3a4d; --rand: #d9d5cc; --gut: #2f8f55; --schlecht: #b8432f; }
+    body { margin: 0; background: #f4f2ed; color: #1d2730; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+    h1 { color: var(--dunkel); margin-bottom: .2em; }
+    textarea { width: 100%; min-height: 140px; font: 14px ui-monospace, Consolas, monospace; padding: .7em; border: 1px solid var(--rand); border-radius: 10px; box-sizing: border-box; }
+    button { font: inherit; padding: .5em 1em; border-radius: 10px; border: none; background: var(--dunkel); color: #fff; font-weight: 600; cursor: pointer; margin-top: .6em; }
+    .tabelle-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1.4em; background: #fff; border-radius: 10px; overflow: hidden; }
+    th, td { text-align: left; padding: .5em .7em; border-bottom: 1px solid var(--rand); vertical-align: top; font-size: .95rem; }
+    th { background: #e8e4dc; }
+    .ok { color: var(--gut); font-weight: 600; }
+    .nein { color: var(--schlecht); font-weight: 600; }
+    .klein { font-size: .85rem; color: #5d6b75; }
+  </style>
+  <script type="module" crossorigin src="./assets/pruefung-COFITB87.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/code-BoTZ4eTZ.js">
+</head>
+<body>
+  <main>
+    <h1>Abschlusscodes prüfen</h1>
+    <p>Füge einen oder mehrere Abschlusscodes ein (einen pro Zeile, z. B. aus Teams kopiert). Alles bleibt in diesem Browser, nichts wird gesendet.</p>
+    <textarea id="eingabe" placeholder="SCHMELZ-…"></textarea>
+    <button id="pruefen">Prüfen</button>
+    <div class="tabelle-wrap"><table id="tabelle" hidden>
+      <thead><tr><th>Kürzel</th><th>Paket</th><th>Datum</th><th>Gelöst</th><th>Punkte</th><th>Code gültig</th><th>Aufgaben (Punkte/Versuche)</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="klein">„Code gültig“ prüft die Prüfsumme. Sie erkennt Tippfehler und einfaches Herumbasteln, ist aber kein Fälschungsschutz.</p>
+  </main>
+</body>
+</html>

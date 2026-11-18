@@ -11,9 +11,9 @@
 
 ## Stand: Prototyp 0.1 (18.11.2026)
 
-Spielbar: Vorplatz mit Straße, Haupteingang mit Glasvordach, Eingangshalle und Forum (nach Fotos, Maße geschätzt), 8 Beispielstationen (alle Aufgabentypen außer „Bild anklicken“ und ein Dialog), Punkte, Abzeichen, Speicherstand, Abschlusscode, Prüfseite, Deutsch/Englisch, Tastatur/Maus und Touch.
+Spielbar: Vorplatz mit Straße, Haupteingang mit Glasvordach, Eingangshalle und abgesenktes Atrium (nach Fotos, Maße geschätzt), 8 Beispielstationen (alle Aufgabentypen außer „Bild anklicken“ und ein Dialog), Punkte, Abzeichen, Speicherstand, Abschlusscode, Prüfseite, Deutsch/Englisch, Tastatur/Maus und Touch.
 
-Platzhalter, bis der Plan da ist: genaue Maße von Halle und Forum, Obergeschosse, Vorplatz, Straße, Nachbarhäuser, Audioaufnahme (synthetische Stimme).
+Platzhalter, bis der Plan da ist: genaue Maße von Halle und Atrium, Obergeschosse, Vorplatz, Straße, Nachbarhäuser, Audioaufnahme (synthetische Stimme).
 
 ## Lokal starten
 

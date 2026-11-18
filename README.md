@@ -11,9 +11,9 @@
 
 ## Stand: Prototyp 0.1 (18.11.2026)
 
-Spielbar: Vorplatz mit Straße, geöffneter Haupteingang, Aula, 8 Beispielstationen (alle Aufgabentypen außer „Bild anklicken“ und ein Dialog), Punkte, Abzeichen, Speicherstand, Abschlusscode, Prüfseite, Deutsch/Englisch, Tastatur/Maus und Touch.
+Spielbar: Vorplatz mit Straße, Haupteingang mit Glasvordach, Eingangshalle und Forum (nach Fotos, Maße geschätzt), 8 Beispielstationen (alle Aufgabentypen außer „Bild anklicken“ und ein Dialog), Punkte, Abzeichen, Speicherstand, Abschlusscode, Prüfseite, Deutsch/Englisch, Tastatur/Maus und Touch.
 
-Platzhalter, bis Plan und Fotos da sind: Maße und Einrichtung der Aula, Vorplatz, Straße, Nachbarhäuser, Audioaufnahme (synthetische Stimme).
+Platzhalter, bis der Plan da ist: genaue Maße von Halle und Forum, Obergeschosse, Vorplatz, Straße, Nachbarhäuser, Audioaufnahme (synthetische Stimme).
 
 ## Lokal starten
 
@@ -23,7 +23,9 @@ npm install
 npm run dev
 ```
 
-Dann <http://localhost:5173> öffnen. Ein bestimmtes Paket: `?paket=name`, ohne Angabe läuft `demo`. Codes prüfen: `pruefung.html`.
+Dann <http://localhost:5173> öffnen. Veröffentlichen: `npm run veroeffentlichen` (baut und lädt in den Zweig `gh-pages`).
+
+Online: <https://bernhardgmeiner.github.io/schmelz-spiel/> Ein bestimmtes Paket: `?paket=name`, ohne Angabe läuft `demo`. Codes prüfen: `pruefung.html`.
 
 ## Ordner
 

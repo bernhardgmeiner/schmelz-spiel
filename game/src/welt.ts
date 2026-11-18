@@ -18,6 +18,7 @@ const EINGANG = new THREE.Vector3(-2.70, 0, -33.055);
 const FASSADEN_WINKEL = -0.1101; // Drehung um y: lokales x entlang der Fassade, lokales z ins Gebäude
 const TUER_BREITE = 4.94;
 const TUER_HOEHE = 4.35;
+const BODEN = 0.3; // Fußbodenhöhe innen (drei Stufen über dem Vorplatz)
 
 // Low-Poly-Farben pro Mesh (Index aus dem Mesh-Namen). null = Textur behalten.
 const FARBEN: Record<number, number | null> = {
@@ -98,7 +99,7 @@ export async function baueWelt(
   const bauer = new Bauer(eingang, physik);
 
   baueVorplatz(bauer);
-  baueAula(bauer);
+  baueForum(bauer);
   baueUmgebung(bauer);
 
   const lokal = (x: number, z: number, y = 0) => eingang.localToWorld(new THREE.Vector3(x, y, z));
@@ -106,11 +107,11 @@ export async function baueWelt(
     ['vorplatz-1', lokal(-6, -7)],
     ['vorplatz-2', lokal(7, -10)],
     ['vorplatz-3', lokal(-13, -13)],
-    ['aula-1', lokal(-6, 6)],
-    ['aula-2', lokal(6.5, 6.5)],
-    ['aula-3', lokal(0, 12.6)],
-    ['aula-4', lokal(8, 2.2)],
-    ['aula-5', lokal(-8.3, 11.5)],
+    ['aula-1', lokal(-4.6, 4.5, BODEN)],
+    ['aula-2', lokal(-3, 21, BODEN)],
+    ['aula-3', lokal(4.2, 35, BODEN + 1.4)],
+    ['aula-4', lokal(4.6, 4.5, BODEN)],
+    ['aula-5', lokal(2.5, 25.5, BODEN)],
   ]);
   return {
     stationsplaetze,
@@ -227,7 +228,7 @@ function baueVorplatz(b: Bauer) {
   // Platzhalter, bis Orthofoto und Fotos da sind: gepflasterter Vorplatz,
   // Gehsteig, Straße, gegenüberliegender Gehsteig.
   const flach = { kollision: false, schatten: false };
-  b.box(0, 0, -9, 70, 0.02, 18, 0xcfcac0, flach); // Vorplatz
+  b.box(0, 0, -9, 70, 0.02, 18, 0xbab6ae, flach); // Vorplatz (Pflaster)
   b.box(0, 0, -19, 160, 0.03, 4, 0xbdb8ae, flach); // Gehsteig
   b.box(0, 0, -25, 160, 0.01, 8, 0x6d7075, flach); // Fahrbahn
   for (let x = -76; x <= 76; x += 6) b.box(x, 0.012, -25, 3, 0.005, 0.18, 0xf2f2f2, flach); // Mittellinie
@@ -236,27 +237,15 @@ function baueVorplatz(b: Bauer) {
   b.box(0, 0, -21.05, 160, 0.12, 0.15, 0xa7a29a, { kollision: false });
   b.box(0, 0, -28.95, 160, 0.12, 0.15, 0xa7a29a, { kollision: false });
 
-  // Stufe und Vordach am Eingang
-  b.box(0, 0, -1.2, 9, 0.12, 2.4, 0xb9b4ab, { kollision: false });
-  b.box(0, TUER_HOEHE + 0.2, -1.4, 8, 0.25, 2.8, 0x8a9399, { kollision: false });
-  // Türrahmen außen
-  b.box(-TUER_BREITE / 2 - 0.1, 0, -0.05, 0.2, TUER_HOEHE + 0.1, 0.2, 0x4a5157, { kollision: false });
-  b.box(TUER_BREITE / 2 + 0.1, 0, -0.05, 0.2, TUER_HOEHE + 0.1, 0.2, 0x4a5157, { kollision: false });
-  b.box(0, TUER_HOEHE, -0.05, TUER_BREITE + 0.4, 0.15, 0.2, 0x4a5157, { kollision: false });
-  // offene Glastürflügel
-  const glas = b.mat(0x9cc3d8, { transparent: true, opacity: 0.35 });
-  b.box(-TUER_BREITE / 2 + 0.05, 0, 0.75, 0.06, 2.4, 1.4, glas, { kollision: false, schatten: false });
-  b.box(TUER_BREITE / 2 - 0.05, 0, 0.75, 0.06, 2.4, 1.4, glas, { kollision: false, schatten: false });
+  baueEingang(b);
 
-  // Schild über dem Eingang
-  const schild = textTafel(['GRG 15', 'Auf der Schmelz'], 6, 1.4);
-  b.add(schild, 0, TUER_HOEHE + 1.35, -0.12);
-  schild.rotation.y = Math.PI;
-
-  // Fahrradständer, Bänke, Bäume, Laternen
-  for (let i = 0; i < 6; i++) b.box(10 + i * 0.9, 0, -4, 0.08, 0.8, 0.9, 0x5a6168);
-  b.box(-9, 0, -4, 2.2, 0.45, 0.6, 0x8b6a4a);
-  b.box(-14, 0, -4, 2.2, 0.45, 0.6, 0x8b6a4a);
+  // Fahrradbügel links vom Eingang (wie auf dem Foto), Bäume, Laternen
+  for (let i = 0; i < 8; i++) {
+    const x = -16 + i * 1.1;
+    b.box(x, 0, -1.6, 0.05, 0.75, 0.05, 0xb8bcc0, { kollision: false });
+    b.box(x, 0, -2.4, 0.05, 0.75, 0.05, 0xb8bcc0, { kollision: false });
+    b.box(x, 0.72, -2.0, 0.05, 0.05, 0.85, 0xb8bcc0, { kollision: false });
+  }
   for (const [x, z] of [[-20, -15], [-8, -15.5], [8, -15.5], [20, -15], [32, -15], [-32, -15]]) baum(b, x, z);
   for (const x of [-36, -12, 12, 36]) {
     b.box(x, 0, -21.6, 0.15, 5.5, 0.15, 0x3e4449);
@@ -296,65 +285,272 @@ function baueUmgebung(b: Bauer) {
   }
 }
 
-// ---------- Aula (Platzhalter) ----------
 
-function baueAula(b: Bauer) {
-  // Lage: hinter dem Haupteingang, 20 m breit, 14 m tief, 5 m hoch.
-  // Echte Maße kommen aus dem Fluchtwegplan (Asset-Plan A1/A2).
-  const B = 20, T = 14, H = 5, D = 0.3, z0 = 0.05;
+// ---------- Haupteingang (nach Bernhards Fotos) ----------
+// Gläsernes Vordach an vier Zugstangen, drei Doppeltüren aus Glas und Alu,
+// Stufen mit gelber Kante, Geländer, Hecken, Pflanztröge, Leitlinie.
+
+const ALU = 0xc9cdd0;
+const STAHL = 0x8d9399;
+
+function baueEingang(b: Bauer) {
+  const glas = b.mat(0xa9c9d6, { transparent: true, opacity: 0.32 });
+  const ohne = { kollision: false };
+
+  // Podest und zwei Stufen bis auf Bodenhöhe innen
+  b.box(0, 0, -1.3, 7.2, BODEN, 2.6, 0xb3afa8);
+  for (let k = 0; k < 2; k++) {
+    const t = -2.6 - 0.35 * (k + 1) + 0.175;
+    b.box(0, 0, t, 7.2, BODEN - 0.1 * (k + 1), 0.35, 0xb3afa8);
+    b.box(0, BODEN - 0.1 * (k + 1) - 0.005, t - 0.15, 7.2, 0.012, 0.06, 0xe8c531, ohne); // gelbe Kante
+  }
+  b.box(0, BODEN - 0.005, -2.57, 7.2, 0.012, 0.06, 0xe8c531, ohne);
+  // Geländer links und rechts
+  for (const sx of [-1, 1]) {
+    const x = sx * 3.75;
+    for (const z of [-3.3, -0.4]) b.box(x, 0, z, 0.05, 1.0 + BODEN, 0.05, ALU, ohne);
+    b.box(x, 1.0 + BODEN, -1.85, 0.06, 0.05, 2.95, ALU, ohne);
+  }
+
+  // Türanlage: drei Doppeltüren, Oberlicht, Paneel bis zur Öffnungsoberkante
+  const B = TUER_BREITE, H = 2.75, OBER = 3.35;
+  const feld = B / 3;
+  for (let i = 0; i < 3; i++) {
+    const xm = -B / 2 + feld * (i + 0.5);
+    b.box(xm - feld / 2 + 0.04, BODEN, 0.1, 0.08, OBER - BODEN, 0.12, ALU, ohne); // Rahmen
+    if (i !== 1) {
+      // geschlossene Flügel aus Glas mit Kollision
+      b.box(xm, BODEN, 0.1, feld - 0.1, H - BODEN, 0.05, glas, { kollision: true, schatten: false });
+      b.box(xm, BODEN + 1.0, 0.04, 0.04, 0.3, 0.04, 0x6d7378, ohne); // Griff
+    } else {
+      // mittlere Tür steht offen (Flügel nach innen geklappt)
+      for (const sx of [-1, 1]) b.box(xm + sx * (feld / 2 - 0.05), BODEN, 0.5, 0.05, H - BODEN, 0.8, glas, { kollision: false, schatten: false });
+    }
+  }
+  b.box(B / 2 - 0.04, BODEN, 0.1, 0.08, OBER - BODEN, 0.12, ALU, ohne);
+  b.box(0, H, 0.1, B, 0.1, 0.12, ALU, ohne); // Kämpfer
+  b.box(0, H + 0.1, 0.1, B, OBER - H - 0.15, 0.04, glas, { kollision: false, schatten: false }); // Oberlicht
+  b.box(0, OBER - 0.05, 0.1, B, 0.1, 0.12, ALU, ohne);
+  b.box(0, OBER + 0.05, 0.12, B, TUER_HOEHE - OBER, 0.1, 0xd9dad5, ohne); // Fassadenpaneel darüber
+
+  // Vordach: Glasplatte auf vier Trägern, an Zugstangen zur Fassade
+  const dachY = 3.75;
+  b.box(0, dachY + 0.22, -2.0, 9.6, 0.04, 3.9, b.mat(0xd6ecec, { transparent: true, opacity: 0.55 }), { kollision: false, schatten: true });
+  b.box(0, dachY, -0.15, 9.2, 0.2, 0.2, STAHL, ohne); // Wandträger
+  for (const x of [-4.2, -1.4, 1.4, 4.2]) {
+    b.box(x, dachY, -2.0, 0.12, 0.22, 3.9, STAHL, ohne);
+    const von = new THREE.Vector3(x, dachY + 0.2, -3.8);
+    const bis = new THREE.Vector3(x * 0.85, 9.2, -0.05);
+    const stange = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, von.distanceTo(bis), 6), b.mat(ALU));
+    stange.position.copy(von).lerp(bis, 0.5);
+    stange.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bis.clone().sub(von).normalize());
+    b.gruppe.add(stange);
+  }
+  for (const x of [-2.8, 0, 2.8]) b.box(x, dachY - 0.05, -2.6, 0.5, 0.05, 0.12, b.mat(0xffffff, { emissive: 0xfff3d6, emissiveIntensity: 0.6 }), ohne);
+
+  // Hecken links und rechts des Eingangs
+  const hecke = b.mat(0x3f5f37, { flatShading: true });
+  b.box(-6.4, 0, -1.0, 4.6, 1.3, 1.6, hecke);
+  b.box(6.6, 0, -1.0, 5.0, 1.3, 1.6, hecke);
+  // Pflanztröge mit Büschen
+  for (const x of [-3.0, -1.0, 1.0, 3.0]) {
+    b.box(x, 0, -7.2, 1.9, 0.55, 0.65, 0xc27a62);
+    const busch = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0), b.mat(0x6f8f4c, { flatShading: true }));
+    busch.scale.set(1.4, 0.9, 0.8);
+    b.add(busch, x + (x > 0 ? 0.3 : -0.3), 0.85, -7.2);
+  }
+  // Blindenleitlinie vom Gehsteig zur Treppe
+  for (let z = -17; z < -3.4; z += 0.3) b.box(-4.6, 0.02, z, 0.3, 0.01, 0.12, 0xd8cf9a, { kollision: false, schatten: false });
+
+  // kleines Schild neben der Tür
+  const schild = textTafel(['GRG 15', 'Auf der Schmelz'], 1.1, 0.55, '#f4f4f1', '#1f3a5f');
+  b.add(schild, 3.3, 2.0, -0.08);
+  schild.rotation.y = Math.PI;
+}
+
+// ---------- Forum (Aula) nach Bernhards Fotos ----------
+// Eingangshalle, dann das Forum unter dem Glasdach: blaue Fläche mit beigen
+// Rauten, Sitzstufen rundherum, Galerien mit weißen Brüstungen und dunklem
+// Holzhandlauf, gläserner Lift zwischen zwei Treppen, Oberlicht.
+// Maße sind geschätzt, bis der Fluchtwegplan da ist.
+
+const WEISS = 0xf3f1ec;
+const BLAU_SOCKEL = 0x4b76ad;
+const BEIGE = 0xe6bb8c;
+const BLAU_BODEN = 0x4f7cab;
+const HOLZ = 0x5a3a26;
+const GELB_TUER = 0xe8cf72;
+
+function baueForum(b: Bauer) {
   const innen = { innen: true };
-  const wand = 0xf1ede4;
-  // Boden und Decke
-  b.box(0, 0, z0 + T / 2, B, 0.04, T, 0xcdc6b8, { ...innen, kollision: false });
-  b.box(0, H, z0 + T / 2, B, 0.2, T, 0xf6f4ef, innen);
-  // Wand vorne mit Türöffnung
-  const seite = (B - TUER_BREITE) / 2;
-  b.box(-(TUER_BREITE / 2 + seite / 2), 0, z0 + D / 2, seite, H, D, wand, innen);
-  b.box(TUER_BREITE / 2 + seite / 2, 0, z0 + D / 2, seite, H, D, wand, innen);
-  b.box(0, TUER_HOEHE, z0 + D / 2, TUER_BREITE, H - TUER_HOEHE, D, wand, innen);
-  // Seiten und hinten
-  b.box(-B / 2 - D / 2, 0, z0 + T / 2, D, H, T + D, wand, innen);
-  b.box(B / 2 + D / 2, 0, z0 + T / 2, D, H, T + D, wand, innen);
-  b.box(0, 0, z0 + T + D / 2, B + 2 * D, H, D, wand, innen);
-  // Sockelleiste
-  b.box(0, 0, z0 + T - 0.02, B, 0.12, 0.04, 0x8d8a83, { ...innen, kollision: false });
+  const deko = { innen: true, kollision: false };
+  const z0 = 0.05;
+  const D = 0.3;
+  const licht = (s = 0.8) => b.mat(0xffffff, { emissive: 0xfff4dc, emissiveIntensity: s });
 
-  // Deckenleuchten
-  const licht = b.mat(0xffffff, { emissive: 0xfff6e0, emissiveIntensity: 0.9 });
-  for (const lx of [-6, 0, 6]) for (const lz of [3.5, 7.5, 11.5]) {
-    b.box(lx, H - 0.06, lz, 2.4, 0.06, 0.6, licht, { ...innen, kollision: false });
+  // --- Eingangshalle: x -7..7, z 0..9, Decke 3,6 m ---
+  const hx = 7, hz = 9, hh = 3.6;
+  b.box(0, 0, (z0 + hz) / 2, 2 * hx, BODEN, hz - z0, BEIGE, innen);
+  rauten(b, -hx + 1, hx - 1, 1.4, hz - 0.6, 2.4, 0x4a6fa3, 0.8);
+  // Vorderwand mit Türöffnung
+  const seite = hx - TUER_BREITE / 2;
+  for (const sx of [-1, 1]) {
+    b.box(sx * (TUER_BREITE / 2 + seite / 2), BODEN, z0 + D / 2, seite, hh, D, WEISS, innen);
+    b.box(sx * (TUER_BREITE / 2 + seite / 2), BODEN, z0 + D + 0.02, seite, 1.0, 0.04, BLAU_SOCKEL, deko);
   }
-  // Säulen
-  for (const sx of [-4.5, 4.5]) for (const sz of [5, 10]) b.box(sx, 0, sz, 0.6, H, 0.6, 0xe4dfd4, innen);
+  // Seitenwände mit Sockel und gelben Türen
+  for (const sx of [-1, 1]) {
+    b.box(sx * (hx + D / 2), BODEN, (z0 + hz) / 2, D, hh, hz - z0, WEISS, innen);
+    b.box(sx * (hx - 0.02), BODEN, (z0 + hz) / 2, 0.04, 1.0, hz - z0, BLAU_SOCKEL, deko);
+    b.box(sx * (hx - 0.03), BODEN, 5.5, 0.06, 2.2, 1.15, 0x2f3438, deko);
+    b.box(sx * (hx - 0.06), BODEN, 5.5, 0.06, 2.1, 1.0, GELB_TUER, deko);
+  }
+  b.box(0, BODEN + hh, (z0 + hz) / 2, 2 * hx + 0.6, 0.2, hz - z0, 0xeceae4, innen); // Decke
+  for (const lx of [-3.5, 0, 3.5]) for (const lz of [2.5, 6.5]) b.box(lx, BODEN + hh - 0.04, lz, 1.2, 0.04, 0.3, licht(), deko);
+  const info = textTafel(['Willkommen · Welcome', 'Forum →'], 2.4, 1.0, '#1f3a5f');
+  b.add(info, -4.6, BODEN + 1.9, z0 + D + 0.03);
 
-  // Portierloge links vom Eingang
-  b.box(-7.2, 0, 2.6, 3.6, 1.1, 0.8, 0x8f7a62, innen);
-  b.box(-7.2, 1.1, 2.6, 3.7, 0.06, 0.95, 0xb9a487, { ...innen, kollision: false });
-  // Bänke
-  b.box(0, 0, 7.5, 3, 0.45, 0.6, 0x8b6a4a, innen);
-  b.box(-8.8, 0, 7, 0.6, 0.45, 3, 0x8b6a4a, innen);
-  // Pflanzen
-  for (const [px, pz] of [[-9.3, 0.9], [9.3, 0.9], [9.3, 13.2]]) {
-    b.box(px, 0, pz, 0.6, 0.5, 0.6, 0x9a6a4f, innen);
-    const k = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 0), b.mat(0x5f8f4a, { flatShading: true }));
-    b.add(k, px, 1.05, pz);
+  // --- Forum: x -12..10, z 9..37, Decke in 10,6 m ---
+  const fx0 = -12, fx1 = 10, fz0 = hz, fz1 = 37, fh = 10.6;
+  const mx = (fx0 + fx1) / 2, mz = (fz0 + fz1) / 2;
+  b.box(mx, 0, mz, fx1 - fx0, BODEN, fz1 - fz0, BEIGE, innen);
+  // blaue Fläche (achteckig) mit Rauten
+  const bx0 = -7, bx1 = 5, bz0 = 13, bz1 = 29, fase = 2;
+  const form = new THREE.Shape();
+  form.moveTo(bx0 + fase, bz0); form.lineTo(bx1 - fase, bz0); form.lineTo(bx1, bz0 + fase);
+  form.lineTo(bx1, bz1 - fase); form.lineTo(bx1 - fase, bz1); form.lineTo(bx0 + fase, bz1);
+  form.lineTo(bx0, bz1 - fase); form.lineTo(bx0, bz0 + fase); form.closePath();
+  const geo = new THREE.ShapeGeometry(form);
+  geo.rotateX(Math.PI / 2); // (x, y) -> (x, 0, y)
+  const blau = new THREE.Mesh(geo, b.mat(BLAU_BODEN, { side: THREE.DoubleSide }));
+  b.add(blau, 0, BODEN + 0.003, 0);
+  rauten(b, bx0 + 1.5, bx1 - 1.5, bz0 + 1.5, bz1 - 1.5, 3, 0xf0cf93, 1.0);
+
+  // Sitzstufen links, rechts und hinten: 4 Stufen à 35 cm
+  const st = 0.35;
+  const zl0 = bz0, zl1 = fz1; // Länge der Seitenstufen
+  for (let k = 1; k <= 4; k++) {
+    const h = BODEN + st * k;
+    const lx0 = k === 4 ? fx0 : bx0 - k, lx1 = bx0 - (k - 1);
+    const rx0 = bx1 + (k - 1), rx1 = k === 4 ? fx1 : bx1 + k;
+    const hz0 = bz1 + (k - 1), hz1 = k === 4 ? fz1 : bz1 + k;
+    const zA = zl0 + (k - 1) * 0; // Seitenstufen beginnen alle bei bz0
+    b.box((lx0 + lx1) / 2, 0, (zA + zl1) / 2, lx1 - lx0, h, zl1 - zA, BEIGE, innen);
+    b.box((rx0 + rx1) / 2, 0, (zA + zl1) / 2, rx1 - rx0, h, zl1 - zA, BEIGE, innen);
+    b.box((bx0 + bx1) / 2, 0, (hz0 + hz1) / 2, bx1 - bx0, h, hz1 - hz0, BEIGE, innen);
+    if (k < 4) {
+      // blaue Polster und Lüftungsgitter an den Stufen
+      for (let z = bz0 + 1.2; z < bz1 - 1; z += 4) {
+        b.box(lx1 - 0.5, h, z, 0.35, 0.07, 1.5, 0x3e6493, deko);
+        b.box(rx0 + 0.5, h, z, 0.35, 0.07, 1.5, 0x3e6493, deko);
+        b.box(lx1 + 0.01, h - 0.25, z + 2, 0.02, 0.12, 1.2, 0x8a8f94, deko);
+        b.box(rx0 - 0.01, h - 0.25, z + 2, 0.02, 0.12, 1.2, 0x8a8f94, deko);
+      }
+      for (let x = bx0 + 1.2; x < bx1 - 1; x += 4) b.box(x, h, hz0 + 0.5, 1.5, 0.07, 0.35, 0x3e6493, deko);
+    }
   }
-  // Infobildschirm und Schaukasten
-  const info = textTafel(['Willkommen · Welcome', 'Aula · GRG 15'], 3.2, 1.8, '#20343f');
-  b.add(info, 3, 2.6, z0 + T - 0.02);
-  info.rotation.y = Math.PI;
-  b.box(9.95, 0.9, 9, 0.2, 1.6, 3.2, 0x6b4f3a, innen);
-  const vitrine = textTafel(['Schaukasten', '(Fotos folgen)'], 3, 1.4, '#e9e3d6', '#55493b');
-  b.add(vitrine, 9.83, 1.7, 9);
-  vitrine.rotation.y = -Math.PI / 2;
-  // Geschlossene Türen zum Gang (kommen in der nächsten Ausbaustufe)
-  for (const tx of [-6, 7]) {
-    b.box(tx, 0, z0 + T - 0.06, 2.2, 2.6, 0.1, 0x6f7d86, { ...innen, kollision: false });
-    const s = textTafel(['Gang · Corridor', 'bald offen · coming soon'], 1.8, 0.5, '#2f4552');
-    b.add(s, tx, 2.95, z0 + T - 0.12);
+  // vordere Ecken: Stufenblöcke vor der blauen Fläche abschließen
+  const podest = BODEN + 4 * st;
+
+  // Wände des Forums
+  b.box(fx0 - D / 2, 0, mz, D, fh, fz1 - fz0, WEISS, innen);
+  b.box(fx1 + D / 2, 0, mz, D, fh, fz1 - fz0, WEISS, innen);
+  b.box(mx, 0, fz1 + D / 2, fx1 - fx0 + 2 * D, fh, D, WEISS, innen);
+  b.box((fx0 - hx) / 2, 0, fz0 - D / 2, -hx - fx0, fh, D, WEISS, innen);
+  b.box((hx + fx1) / 2, 0, fz0 - D / 2, fx1 - hx, fh, D, WEISS, innen);
+  b.box(0, BODEN + hh, fz0 - D / 2, 2 * hx, fh - BODEN - hh, D, WEISS, innen);
+
+  // Galerien in 4,6 m und 8,0 m Höhe als Ring um das offene Forum
+  const ix0 = -9, ix1 = 7, iz0 = 11.5, iz1 = 34.6;
+  for (const ebene of [4.6, 8.0]) {
+    const dicke = 0.45, y = ebene - dicke;
+    b.box(mx, y, (fz0 + iz0) / 2, fx1 - fx0, dicke, iz0 - fz0, WEISS, deko);
+    b.box(mx, y, (iz1 + fz1) / 2, fx1 - fx0, dicke, fz1 - iz1, WEISS, deko);
+    b.box((fx0 + ix0) / 2, y, (iz0 + iz1) / 2, ix0 - fx0, dicke, iz1 - iz0, WEISS, deko);
+    b.box((ix1 + fx1) / 2, y, (iz0 + iz1) / 2, fx1 - ix1, dicke, iz1 - iz0, WEISS, deko);
+    const bruestung = (x: number, z: number, lx: number, lz: number) => {
+      b.box(x, ebene, z, lx, 1.0, lz, 0xf6f5f1, deko);
+      b.box(x, ebene + 1.0, z, lx + 0.12, 0.08, lz + 0.12, HOLZ, deko);
+    };
+    bruestung((ix0 + ix1) / 2, iz0, ix1 - ix0, 0.15);
+    bruestung((ix0 + ix1) / 2, iz1, ix1 - ix0, 0.15);
+    bruestung(ix0, (iz0 + iz1) / 2, 0.15, iz1 - iz0);
+    bruestung(ix1, (iz0 + iz1) / 2, 0.15, iz1 - iz0);
+    for (const z of [15, 21, 27]) {
+      b.box(fx0 + 0.05, ebene, z, 0.06, 2.1, 1.0, GELB_TUER, deko);
+      b.box(fx1 - 0.05, ebene, z, 0.06, 2.1, 1.0, GELB_TUER, deko);
+    }
+    b.box(fx0 + 0.02, ebene, mz, 0.04, 0.9, fz1 - fz0, BLAU_SOCKEL, deko);
+    b.box(fx1 - 0.02, ebene, mz, 0.04, 0.9, fz1 - fz0, BLAU_SOCKEL, deko);
+    for (const z of [14, 20, 26, 32]) b.box(-1, ebene + 2.9, z, 1.0, 0.04, 0.3, licht(0.5), deko);
+  }
+  // Stützen: weiß, zwei mit orangem Belag
+  const stuetzen: [number, number, number][] = [[ix0, iz0, WEISS], [ix1, iz0, WEISS], [ix0, 23, 0xc8743f], [ix1, 23, WEISS], [ix0, iz1, WEISS], [ix1, iz1, 0xc8743f]];
+  for (const [x, z, farbe] of stuetzen) b.box(x, 0, z, 0.5, 8.0, 0.5, farbe, innen);
+
+  // Gläserner Lift in der Mitte hinten
+  const lx = -1, lz = 35.6;
+  const liftGlas = b.mat(0xb7d3dc, { transparent: true, opacity: 0.3 });
+  b.box(lx, podest, lz, 2.4, 9.0, 2.4, liftGlas, { innen: true, schatten: false });
+  for (const [ex, ez] of [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2]]) b.box(lx + ex, podest, lz + ez, 0.08, 9.0, 0.08, 0x9ea5a8, deko);
+  for (const y of [3.2, 6.6]) b.box(lx, podest + y, lz, 2.45, 0.08, 2.45, 0x9ea5a8, deko);
+  b.box(lx, podest, lz, 1.4, 2.3, 1.4, 0x8f979b, deko);
+  b.box(lx, podest - 1.0, lz - 1.25, 2.4, 1.0, 0.1, 0xdedcd6, deko); // Betonsockel vorne
+
+  // Zwei Treppen vom Podest hinauf zur ersten Galerie (noch gesperrt)
+  const stufen = 12, auftritt = 0.42;
+  const steigung = (4.6 - podest) / stufen;
+  const lauf = stufen * auftritt;
+  for (const sx of [-1, 1]) {
+    const start = lx + sx * 1.6;
+    for (let i = 0; i < stufen; i++) {
+      // unterste Stufe außen, oben beim Lift (wie auf den Fotos)
+      const x = start + sx * ((stufen - 1 - i) * auftritt + auftritt / 2);
+      const top = podest + (i + 1) * steigung;
+      b.box(x, top - 0.18, 33.9, auftritt, 0.18, 1.6, WEISS, deko);
+    }
+    const winkel = Math.atan2(4.6 - podest, lauf);
+    const wange = new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(lauf, 4.6 - podest), 0.8, 0.1), b.mat(0xf6f5f1));
+    wange.position.set(start + sx * lauf / 2, (podest + 4.6) / 2 + 0.2, 33.05);
+    wange.rotation.z = -sx * winkel;
+    b.gruppe.add(wange);
+    const handlauf = new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(lauf, 4.6 - podest), 0.08, 0.14), b.mat(HOLZ));
+    handlauf.position.copy(wange.position).add(new THREE.Vector3(0, 0.44, 0));
+    handlauf.rotation.z = -sx * winkel;
+    b.gruppe.add(handlauf);
+    // Absperrung am Treppenfuß
+    const fuss = start + sx * (lauf + 0.25);
+    b.box(fuss, podest, 33.9, 0.1, 1.0, 1.8, 0xd0453a, { innen: true });
+    const s = textTafel(['1. Stock', 'bald offen · coming soon'], 1.3, 0.45, '#b23a2f');
+    b.add(s, fuss, podest + 1.3, 32.95);
     s.rotation.y = Math.PI;
   }
-  // Warmes Raumlicht
-  const p = new THREE.PointLight(0xfff1dc, 6, 22, 1.2);
-  b.add(p, 0, H - 0.8, 7);
+
+  // Decke mit Oberlicht unter dem Glasdach
+  const ox0 = -5, ox1 = 3, oz0 = 17, oz1 = 33;
+  const decke = 0xeceae4;
+  b.box(mx, fh, (fz0 + oz0) / 2, fx1 - fx0, 0.3, oz0 - fz0, decke, deko);
+  b.box(mx, fh, (oz1 + fz1) / 2, fx1 - fx0, 0.3, fz1 - oz1, decke, deko);
+  b.box((fx0 + ox0) / 2, fh, (oz0 + oz1) / 2, ox0 - fx0, 0.3, oz1 - oz0, decke, deko);
+  b.box((ox1 + fx1) / 2, fh, (oz0 + oz1) / 2, fx1 - ox1, 0.3, oz1 - oz0, decke, deko);
+  b.box((ox0 + ox1) / 2, fh + 0.9, (oz0 + oz1) / 2, ox1 - ox0, 0.05, oz1 - oz0, b.mat(0xeaf5ff, { emissive: 0xe4f1ff, emissiveIntensity: 1.0 }), deko);
+  for (let x = ox0 + 2; x < ox1; x += 2) b.box(x, fh + 0.3, (oz0 + oz1) / 2, 0.08, 0.6, oz1 - oz0, 0xb9c0c4, deko);
+  b.box(ox0, fh + 0.3, (oz0 + oz1) / 2, 0.1, 0.6, oz1 - oz0, WEISS, deko);
+  b.box(ox1, fh + 0.3, (oz0 + oz1) / 2, 0.1, 0.6, oz1 - oz0, WEISS, deko);
+
+  // Raumlicht
+  const p1 = new THREE.PointLight(0xfff4e4, 5, 30, 1.2);
+  b.add(p1, -1, 7, 20);
+  const p2 = new THREE.PointLight(0xfff1dc, 3, 14, 1.2);
+  b.add(p2, 0, BODEN + 3.0, 4.5);
+}
+
+/** Um 45° gedrehte Quadrate als Bodenmuster. */
+function rauten(b: Bauer, x0: number, x1: number, z0: number, z1: number, abstand: number, farbe: number, groesse: number) {
+  let reihe = 0;
+  for (let z = z0; z <= z1; z += abstand * 0.75, reihe++) {
+    for (let x = x0 + (reihe % 2) * abstand / 2; x <= x1; x += abstand) {
+      b.box(x, BODEN + 0.002, z, groesse, 0.006, groesse, farbe, { kollision: false, innen: true, drehung: Math.PI / 4 });
+    }
+  }
 }

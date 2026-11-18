@@ -36,7 +36,7 @@ export class Spieler {
     );
     this.form = physik.createCollider(RAPIER.ColliderDesc.capsule(HALBE_HOEHE, RADIUS), this.koerper);
     this.regler = physik.createCharacterController(0.02);
-    this.regler.enableAutostep(0.35, 0.25, true);
+    this.regler.enableAutostep(0.4, 0.2, true);
     this.regler.enableSnapToGround(0.4);
     this.regler.setMaxSlopeClimbAngle((50 * Math.PI) / 180);
     this.regler.setApplyImpulsesToDynamicBodies(false);

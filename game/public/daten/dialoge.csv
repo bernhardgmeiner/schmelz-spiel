@@ -1,0 +1,4 @@
+dialog,schritt,sprecher,text,optionen,hinweis
+novak-weg,1,Ms Novak,"Hi! I'm Ms Novak, I'm visiting from Dublin for the Erasmus week. Could you tell me where the library is?","*Sure! It's on the first floor. Go up the stairs and turn left.>2|Yes, I could.|Library is being on first floor.",Answer politely and give real directions in a full sentence.
+novak-weg,2,Ms Novak,Thank you! And when does it open in the morning?,*It opens at half past seven.>3|It's opening since 7:30.|At half to eight.,Use the present simple for timetables: “It opens at …”
+novak-weg,3,Ms Novak,"Brilliant, thanks a lot. Have a nice day!",,

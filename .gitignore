@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# Rohdaten (Fotos, Pläne) bleiben lokal, siehe ASSET-PLAN.md
+assets-roh/
+# Paket ist entpackt im Ordner grg15-spiel-handoff/
+grg15-spiel-handoff.zip
+.claude/

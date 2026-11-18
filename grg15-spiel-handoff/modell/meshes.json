@@ -1,0 +1,146 @@
+[
+ {
+  "mesh": "mesh_0_ROOT_Layer0_208_216_218_ss",
+  "dreiecke": 31,
+  "sketchup_material": "*5",
+  "textur": "wand_normal.png",
+  "pixel": [
+   148,
+   115
+  ]
+ },
+ {
+  "mesh": "mesh_1_ROOT_Layer0_255_255_255_ss",
+  "dreiecke": 664,
+  "sketchup_material": "ohne_textur",
+  "textur": "-",
+  "pixel": null
+ },
+ {
+  "mesh": "mesh_2_ROOT_Layer0_190_162_85_ss",
+  "dreiecke": 38,
+  "sketchup_material": "wand_turnsaal_normal",
+  "textur": "wand_turnsaal_normal.png",
+  "pixel": [
+   85,
+   79
+  ]
+ },
+ {
+  "mesh": "mesh_3_ROOT_Layer0_136_143_141_ss",
+  "dreiecke": 4,
+  "sketchup_material": "fenster_toilette",
+  "textur": "fenster_toilette.png",
+  "pixel": [
+   300,
+   210
+  ]
+ },
+ {
+  "mesh": "mesh_4_ROOT_Layer0_96_108_118_ss",
+  "dreiecke": 88,
+  "sketchup_material": "fenster_haupt",
+  "textur": "fenster_haupt.png",
+  "pixel": [
+   167,
+   450
+  ]
+ },
+ {
+  "mesh": "mesh_5_ROOT_Layer0_143_155_165_ss",
+  "dreiecke": 22,
+  "sketchup_material": "wand_muster",
+  "textur": "wand_muster.png",
+  "pixel": [
+   236,
+   104
+  ]
+ },
+ {
+  "mesh": "mesh_6_ROOT_Layer0_136_151_162_ss",
+  "dreiecke": 23,
+  "sketchup_material": "*4",
+  "textur": "fenster_dazwischen.png",
+  "pixel": [
+   400,
+   315
+  ]
+ },
+ {
+  "mesh": "mesh_7_ROOT_Layer0_194_202_205_ss",
+  "dreiecke": 92,
+  "sketchup_material": "dach",
+  "textur": "dach.png",
+  "pixel": [
+   148,
+   115
+  ]
+ },
+ {
+  "mesh": "mesh_8_ROOT_Layer0_87_118_137_ss",
+  "dreiecke": 20,
+  "sketchup_material": "glasdach",
+  "textur": "glasdach.png",
+  "pixel": [
+   32,
+   68
+  ]
+ },
+ {
+  "mesh": "mesh_9_ROOT_Layer0_171_180_184_ss",
+  "dreiecke": 324,
+  "sketchup_material": "dach_rand",
+  "textur": "dach_rand.png",
+  "pixel": [
+   148,
+   115
+  ]
+ },
+ {
+  "mesh": "mesh_10_ROOT_Layer0_255_255_255_ds",
+  "dreiecke": 4,
+  "sketchup_material": "ohne_textur",
+  "textur": "-",
+  "pixel": null
+ },
+ {
+  "mesh": "mesh_11_ROOT_Layer0_76_79_77_ss",
+  "dreiecke": 2,
+  "sketchup_material": "*3",
+  "textur": "haupteingang.png",
+  "pixel": [
+   200,
+   113
+  ]
+ },
+ {
+  "mesh": "mesh_12_ROOT_Layer0_119_123_125_ss",
+  "dreiecke": 2,
+  "sketchup_material": "fenster_rand",
+  "textur": "fenster_rand.png",
+  "pixel": [
+   19,
+   450
+  ]
+ },
+ {
+  "mesh": "mesh_13_ROOT_Layer0_142_141_125_ss",
+  "dreiecke": 16,
+  "sketchup_material": "wand_turnsaal_fenster",
+  "textur": "wand_turnsaal_fenster.png",
+  "pixel": [
+   130,
+   400
+  ]
+ },
+ {
+  "mesh": "mesh_14_ROOT_Layer0_66_71_70_ss",
+  "dreiecke": 2,
+  "sketchup_material": "turnsaal_tuer",
+  "textur": "turnsaal_tuer.png",
+  "pixel": [
+   169,
+   68
+  ]
+ }
+]

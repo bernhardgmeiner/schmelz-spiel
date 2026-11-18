@@ -491,17 +491,57 @@ function baueForum(b: Bauer) {
     const orange = Math.abs(x) === 2.4;
     b.box(x, BODEN, vz, 0.45, 3.6, 0.45, orange ? ORANGE : WEISS, innen);
   }
+  // Vorhänge sind offen: zusammengeschoben neben den Stützen, Schiene darüber
   for (let i = 0; i < stuetzeX.length - 1; i++) {
     const a = stuetzeX[i] + 0.25, e = stuetzeX[i + 1] - 0.25;
-    if (a < 0 && e > 0) continue; // Mitte bleibt offen
-    // Vorhang: Falten als abwechselnd versetzte Streifen
-    for (let x = a; x < e; x += 0.5) {
-      const w = Math.min(0.5, e - x);
-      b.box(x + w / 2, BODEN, vz + (Math.round((x - a) / 0.5) % 2 ? 0.06 : -0.06), w, 3.5, 0.08, VORHANG, deko);
+    if (a < 0 && e > 0) continue; // Mitte hat keinen Vorhang
+    for (const [x, s] of [[a, 1], [e, -1]] as [number, number][]) {
+      for (let f = 0; f < 3; f++) b.box(x + s * (0.1 + f * 0.11), BODEN, vz + (f % 2 ? 0.07 : -0.07), 0.13, 3.45, 0.16, VORHANG, deko);
     }
-    b.box((a + e) / 2, BODEN, vz, e - a, 3.5, 0.1, VORHANG, { innen: true, schatten: false }); // Kollision
+    b.box((a + e) / 2, BODEN + 3.5, vz, e - a, 0.05, 0.08, 0x8f969b, deko);
   }
   b.box(0, BODEN + 3.6, vz, fx1 - fx0, 0.5, 0.5, WEISS, innen); // Unterzug
+
+  // Hinter der Stützenreihe: Gang mit Buffet, Glastüren und Pinnwänden (rechte Wand)
+  const rw = fx1 - 0.04;
+  b.box(rw, BODEN, 13, 0.06, 3.0, 3.2, 0x6f6a66, deko); // Buffet-Front
+  for (let y = 0.2; y < 2.6; y += 0.18) b.box(rw - 0.02, BODEN + y, 13, 0.03, 0.05, 2.9, 0xd9d6cf, deko); // Rollladen
+  const buffet = textTafel(['Buffet'], 1.6, 0.45, '#6f6a66', '#ffffff');
+  b.add(buffet, rw - 0.05, BODEN + 2.75, 13);
+  buffet.rotation.y = -Math.PI / 2;
+  b.box(rw, BODEN, 17.5, 0.06, 2.6, 2.6, 0x9aa0a4, deko); // Glastür-Rahmen
+  b.box(rw - 0.02, BODEN + 0.05, 17.5, 0.04, 2.45, 2.45, b.mat(0x9fbcc8, { transparent: true, opacity: 0.45 }), deko);
+  b.box(rw - 0.03, BODEN + 1.0, 21.5, 0.04, 1.2, 2.4, 0xc8a46e, deko); // Pinnwand
+  for (const [dz, dy, f] of [[-0.7, 0.3, 0xf4f1e6], [0.1, 0.5, 0xbfe0f2], [0.7, 0.2, 0xf7e27c]] as [number, number, number][]) {
+    b.box(rw - 0.05, BODEN + 1.0 + dy, 21.5 + dz, 0.02, 0.6, 0.45, f, deko);
+  }
+
+  // Wuzzler auf der oberen Ebene links
+  for (const z of [27, 31.5]) {
+    b.box(-11, BODEN + 0.6, z, 0.75, 0.25, 1.4, 0x2f6b3a, innen);
+    for (const [ex, ez] of [[-0.3, -0.6], [0.3, -0.6], [-0.3, 0.6], [0.3, 0.6]]) b.box(-11 + ex, BODEN, z + ez, 0.07, 0.6, 0.07, 0x333333, deko);
+    for (let s = -0.5; s <= 0.5; s += 0.2) b.box(-11, BODEN + 0.78, z + s, 1.1, 0.025, 0.025, 0xb8bcc0, deko);
+  }
+
+  // Bunte Fische aus Pappmaché hängen unter der Decke
+  const fischFarben = [0x2f4fa8, 0xe3622f, 0x3f8f5a, 0xd04a7a, 0x2a2f45, 0xf0c33c, 0x3fb0c9];
+  const fischPos: [number, number, number][] = [[-4, 8.6, 20], [1, 9.0, 23], [-2.5, 7.8, 27], [3, 8.2, 30], [-6, 9.2, 26], [0, 7.4, 33], [2, 9.4, 18], [-1, 8.0, 31.5]];
+  fischPos.forEach(([x, y, z], i) => {
+    const fisch = new THREE.Group();
+    const farbe = b.mat(fischFarben[i % fischFarben.length], { flatShading: true });
+    const leib = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), farbe);
+    leib.scale.set(1.3, 0.75, 0.45);
+    const schwanz = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.5, 4), farbe);
+    schwanz.rotation.z = Math.PI / 2;
+    schwanz.position.x = -0.8;
+    const auge = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 4), b.mat(0xffffff));
+    auge.position.set(0.4, 0.12, 0.2);
+    const faden = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 10.6 - y, 3), b.mat(0xcccccc));
+    faden.position.y = (10.6 - y) / 2;
+    fisch.add(leib, schwanz, auge, faden);
+    fisch.rotation.y = i * 1.3;
+    b.add(fisch, x, y, z);
+  });
   // Uhr über dem Durchgang
   const uhr = new THREE.Group();
   const ziffer = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.08), b.mat(0xf7f7f4));

@@ -52,8 +52,8 @@ renderer.toneMappingExposure = 1.05;
 
 const szene = new THREE.Scene();
 szene.background = new THREE.Color(0xcfe3ee);
-szene.fog = new THREE.Fog(0xcfe3ee, 90, 260);
-const kamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
+szene.fog = new THREE.Fog(0xcfe3ee, 120, 380);
+const kamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
 
 szene.add(new THREE.HemisphereLight(0xeaf3ff, 0xb3a58c, 1.4));
 const sonne = new THREE.DirectionalLight(0xfff4e2, 2.0);
@@ -263,9 +263,11 @@ $('btn-hilfe').onclick = () => {
 
 // ---------- Schleife ----------
 const uhr = new THREE.Clock();
+let angehalten = false; // nur für Tests: Schleife anhalten
 function schleife() {
   requestAnimationFrame(schleife);
-  bild(Math.min(uhr.getDelta(), 1 / 20));
+  const dt = Math.min(uhr.getDelta(), 1 / 20);
+  if (!angehalten) bild(dt);
 }
 function bild(dt: number) {
   if (!spieler) return;
@@ -294,4 +296,16 @@ schleife();
 // für Tests in der Konsole
 (window as unknown as { spiel: unknown }).spiel = { get spieler() { return spieler; }, get stationen() { return stationen; }, oeffne,
   // n Bilder mit 1/60 s simulieren (für Tests, wenn der Tab im Hintergrund ist)
-  tick: (n: number) => { for (let i = 0; i < n; i++) bild(1 / 60); } };
+  tick: (n: number) => { for (let i = 0; i < n; i++) bild(1 / 60); },
+  // Übersichtsbild von einer beliebigen Kameraposition (für Tests)
+  anhalten: (a: boolean) => { angehalten = a; },
+  ueberblick: (x: number, y: number, z: number, zx: number, zy: number, zz: number) => {
+    const k = kamera.clone();
+    k.position.set(x, y, z);
+    if (Math.abs(x - zx) < 1e-3 && Math.abs(z - zz) < 1e-3) k.up.set(0, 0, 1); // Draufsicht: Norden oben
+    k.lookAt(zx, zy, zz); k.far = 1200; k.updateProjectionMatrix();
+    const nebel = szene.fog;
+    szene.fog = null;
+    renderer.render(szene, k);
+    szene.fog = nebel;
+  } };

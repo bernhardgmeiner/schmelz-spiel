@@ -230,74 +230,263 @@ function baueBoden(szene: THREE.Scene, physik: RAPIER.World, eingang: THREE.Grou
     physik.createCollider(RAPIER.ColliderDesc.cuboid(bx / 2, 1, bz / 2).setTranslation(p.x, p.y, p.z).setRotation(q));
   }
   // Unsichtbare Grenze, damit man nicht ins Leere läuft
-  for (const [x, z, b, t] of [[0, -170, 340, 2], [0, 170, 340, 2], [-170, 0, 2, 340], [170, 0, 2, 340]]) {
+  for (const [x, z, b, t] of [[0, -240, 480, 2], [0, 240, 480, 2], [-240, 0, 2, 480], [240, 0, 2, 480]]) {
     physik.createCollider(RAPIER.ColliderDesc.cuboid(b / 2, 10, t / 2).setTranslation(x, 10, z));
   }
 }
 
-// ---------- Vorplatz, Straße ----------
+// ---------- Vorplatz und Umgebung (nach Luftbildern) ----------
+// Koordinaten im Eingangs-System: z+ = ins Gebäude = Norden, x+ = Westen.
+// Der Haupteingang schaut nach Süden. Davor: Pflaster, Bäume, ein Fußweg,
+// dahinter das Leichtathletikstadion. Osten: Wiese und roter Hartplatz.
+// Westen: Fußweg mit Baumreihe, dahinter Kleingärten. Norden (hinter dem
+// Turnsaal): die geschwungene Hauptstraße mit Tankstelle und Wohnblöcken.
+// Südosten: das USZ. Alles stilisiert und in groben Maßen.
+
+const WEG = 0xc9c5bc;
+const flach = { kollision: false, schatten: false };
 
 function baueVorplatz(b: Bauer) {
-  // Platzhalter, bis Orthofoto und Fotos da sind: gepflasterter Vorplatz,
-  // Gehsteig, Straße, gegenüberliegender Gehsteig.
-  const flach = { kollision: false, schatten: false };
-  b.box(0, 0, -9, 70, 0.02, 18, 0xbab6ae, flach); // Vorplatz (Pflaster)
-  b.box(0, 0, -19, 160, 0.03, 4, 0xbdb8ae, flach); // Gehsteig
-  b.box(0, 0, -25, 160, 0.01, 8, 0x6d7075, flach); // Fahrbahn
-  for (let x = -76; x <= 76; x += 6) b.box(x, 0.012, -25, 3, 0.005, 0.18, 0xf2f2f2, flach); // Mittellinie
-  b.box(0, 0, -31, 160, 0.03, 4, 0xbdb8ae, flach); // Gehsteig gegenüber
-  // Gehsteigkanten
-  b.box(0, 0, -21.05, 160, 0.12, 0.15, 0xa7a29a, { kollision: false });
-  b.box(0, 0, -28.95, 160, 0.12, 0.15, 0xa7a29a, { kollision: false });
-
+  b.box(0, 0, -9, 30, 0.02, 18, 0xbab6ae, flach); // Pflaster zwischen den Flügeln
+  b.box(0, 0, -20, 8, 0.02, 4.5, 0xbab6ae, flach); // Zugang zum Fußweg
   baueEingang(b);
-
-  // Fahrradbügel links vom Eingang (wie auf dem Foto), Bäume, Laternen
+  // Fahrradbügel links vom Eingang (wie auf dem Foto)
   for (let i = 0; i < 8; i++) {
-    const x = -16 + i * 1.1;
+    const x = -14 + i * 1.1;
     b.box(x, 0, -1.6, 0.05, 0.75, 0.05, 0xb8bcc0, { kollision: false });
     b.box(x, 0, -2.4, 0.05, 0.75, 0.05, 0xb8bcc0, { kollision: false });
     b.box(x, 0.72, -2.0, 0.05, 0.05, 0.85, 0xb8bcc0, { kollision: false });
   }
-  for (const [x, z] of [[-20, -15], [-8, -15.5], [8, -15.5], [20, -15], [32, -15], [-32, -15]]) baum(b, x, z);
-  for (const x of [-36, -12, 12, 36]) {
-    b.box(x, 0, -21.6, 0.15, 5.5, 0.15, 0x3e4449);
-    b.box(x, 5.5, -22.1, 0.3, 0.15, 1.1, 0x3e4449, { kollision: false });
-  }
 }
-
-function baum(b: Bauer, x: number, z: number, s = 1) {
-  const stamm = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * s, 0.25 * s, 2.6 * s, 6), b.mat(0x7a5a3e));
-  stamm.position.y = 1.3 * s;
-  const krone = new THREE.Mesh(new THREE.IcosahedronGeometry(2.1 * s, 0), b.mat(0x6f9a52, { flatShading: true }));
-  krone.position.y = 3.9 * s;
-  const g = new THREE.Group();
-  g.add(stamm, krone);
-  g.traverse((o) => { o.castShadow = true; });
-  b.add(g, x, 0, z);
-  b.kollisionZylinder(x, z, 0.3 * s, 3);
-}
-
-// ---------- Nachbarschaft ----------
 
 function baueUmgebung(b: Bauer) {
-  // Nachbarhäuser als einfache Blöcke, Platzhalter bis zum Baukörpermodell der Stadt Wien
-  const farben = [0xe8dcc8, 0xd9d2c5, 0xefe6d6, 0xd6cbb8, 0xe2d6c0];
-  let x = -78;
-  let i = 0;
-  while (x < 78) {
-    const breite = 14 + ((i * 7) % 9);
-    const hoehe = 15 + ((i * 5) % 8);
-    b.box(x + breite / 2, 0, -40, breite - 0.4, hoehe, 16, farben[i % farben.length]);
-    // Fensterbänder als dunkle Streifen
-    for (let g = 1; g < hoehe / 3.2; g++) {
-      b.box(x + breite / 2, g * 3.2 - 1.2, -31.95, breite - 2, 1.3, 0.05, 0x56626c, { kollision: false, schatten: false });
-    }
-    x += breite;
-    i++;
+  const baeume: [number, number, number][] = [];
+  const zufall = pseudoZufall(15);
+
+  // --- Wege ---
+  b.box(0, 0, -23.5, 300, 0.025, 3.5, WEG, flach); // Fußweg Ost-West vor der Schule
+  b.box(46, 0, 50, 3.5, 0.025, 150, WEG, flach); // Fußweg im Westen
+  b.box(-48, 0, 20, 4, 0.025, 90, WEG, flach); // Zufahrt im Osten
+  for (let z = -18; z < 120; z += 7) {
+    baeume.push([51 + zufall() * 3, z + zufall() * 3, 0.9 + zufall() * 0.4]);
+    if (z > -10) baeume.push([40 + zufall() * 2, z + 3 + zufall() * 3, 0.8 + zufall() * 0.4]);
   }
+  for (let x = -140; x < 140; x += 8) {
+    if (Math.abs(x) < 6) continue;
+    baeume.push([x + zufall() * 3, -27.5 - zufall() * 3, 0.9 + zufall() * 0.5]);
+    if (Math.abs(x) > 20) baeume.push([x + zufall() * 4, -17 - zufall() * 2, 0.8 + zufall() * 0.5]);
+  }
+
+  // --- Süden: Leichtathletikstadion ---
+  const R = 42, gerade = 90, nord = -38;
+  const zN = nord - R, zS = zN - gerade;
+  const stadion = (r: number) => {
+    const s = new THREE.Shape();
+    s.moveTo(r, zN); s.lineTo(r, zS);
+    s.absarc(0, zS, r, 0, Math.PI, true);
+    s.lineTo(-r, zN);
+    s.absarc(0, zN, r, Math.PI, 0, true);
+    return s;
+  };
+  // Punkt auf dem Stadionumfang für Parameter t in [0, 1): Ostgerade, Südkurve, Westgerade, Nordkurve
+  const punkt = (r: number, t: number): [number, number] => {
+    const lb = Math.PI * r, ges = 2 * gerade + 2 * lb;
+    let d = t * ges;
+    if (d < gerade) return [r, zN - d];
+    d -= gerade;
+    if (d < lb) { const a = -(d / lb) * Math.PI; return [r * Math.cos(a), zS + r * Math.sin(a)]; }
+    d -= lb;
+    if (d < gerade) return [-r, zS + d];
+    d -= gerade;
+    const a = Math.PI - (d / lb) * Math.PI;
+    return [r * Math.cos(a), zN + r * Math.sin(a)];
+  };
+  const ring = (aussen: number, innen: number, farbe: number, y: number) => {
+    // Ring als Dreiecksband zwischen zwei gleich parametrisierten Umfängen
+    const n = 160, pos: number[] = [], idx: number[] = [];
+    for (let i = 0; i < n; i++) {
+      const [ax, az] = punkt(aussen, i / n), [ix, iz] = punkt(innen, i / n);
+      pos.push(ax, 0, az, ix, 0, iz);
+      const j = (i + 1) % n;
+      idx.push(2 * i, 2 * j, 2 * i + 1, 2 * i + 1, 2 * j, 2 * j + 1);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, b.mat(farbe, { side: THREE.DoubleSide }));
+    m.receiveShadow = true;
+    b.add(m, 0, y, 0);
+  };
+  ring(R + 3, R, 0xbfb9ad, 0.02); // Rand
+  ring(R, R - 10, 0xb9533c, 0.025); // Laufbahn
+  for (let k = 1; k < 8; k++) ring(R - 10 + k * 1.25 + 0.04, R - 10 + k * 1.25 - 0.04, 0xf2ece4, 0.03);
+  const innen = stadion(R - 10);
+  const gi = new THREE.ShapeGeometry(innen, 24);
+  gi.rotateX(Math.PI / 2);
+  const rasen = new THREE.Mesh(gi, b.mat(0x5f9a45, { side: THREE.DoubleSide }));
+  rasen.receiveShadow = true;
+  b.add(rasen, 0, 0.025, 0);
+  // Fußballfeld-Linien
+  const fz = (zN + zS) / 2, fl = 100, fb = 62, lin = 0xf4f4ee;
+  for (const [x, z, w, t] of [[0, fz + fl / 2, fb, 0.12], [0, fz - fl / 2, fb, 0.12], [fb / 2, fz, 0.12, fl], [-fb / 2, fz, 0.12, fl], [0, fz, fb, 0.12]]) {
+    b.box(x, 0.03, z, w, 0.005, t, lin, flach);
+  }
+  for (const s of [1, -1]) {
+    const tz = fz + s * fl / 2;
+    b.box(-3.66, 0, tz, 0.12, 2.44, 0.12, 0xffffff, { kollision: false });
+    b.box(3.66, 0, tz, 0.12, 2.44, 0.12, 0xffffff, { kollision: false });
+    b.box(0, 2.44, tz, 7.44, 0.12, 0.12, 0xffffff, { kollision: false });
+  }
+  // Baumreihe zwischen Fußweg und Stadion
+  for (let x = -60; x <= 60; x += 7) baeume.push([x + zufall() * 3, -33 - zufall() * 2, 1 + zufall() * 0.3]);
+
+  // --- Osten: Wiese und roter Hartplatz ---
+  const hx = -87, hz = 52, hb = 34, hl = 44;
+  b.box(hx, 0, hz, hb, 0.03, hl, 0xb5553f, flach);
+  for (const [x, z, w, t] of [[hx, hz + hl / 2 - 1, hb - 2, 0.1], [hx, hz - hl / 2 + 1, hb - 2, 0.1], [hx + hb / 2 - 1, hz, 0.1, hl - 2], [hx - hb / 2 + 1, hz, 0.1, hl - 2], [hx, hz, hb - 2, 0.1]]) {
+    b.box(x, 0.032, z, w, 0.004, t, 0xf0ece6, flach);
+  }
+  for (const s of [1, -1]) {
+    // Handballtore an den Stirnseiten
+    const tz = hz + s * (hl / 2 - 1);
+    b.box(hx - 1.5, 0, tz, 0.1, 2, 0.1, 0xf4f4f4, { kollision: false });
+    b.box(hx + 1.5, 0, tz, 0.1, 2, 0.1, 0xf4f4f4, { kollision: false });
+    b.box(hx, 2, tz, 3.1, 0.1, 0.1, 0xf4f4f4, { kollision: false });
+  }
+  // Ballfangzaun als Pfosten mit Zaunfeld
+  const zaun = b.mat(0x2f4a35, { transparent: true, opacity: 0.35 });
+  b.box(hx, 0, hz + hl / 2 + 1, hb + 2, 4, 0.05, zaun, { kollision: true, schatten: false });
+  b.box(hx, 0, hz - hl / 2 - 1, hb + 2, 4, 0.05, zaun, { kollision: true, schatten: false });
+  b.box(hx - hb / 2 - 1, 0, hz, 0.05, 4, hl + 2, zaun, { kollision: true, schatten: false });
+  b.box(hx + hb / 2 + 1, 0, hz - 5, 0.05, 4, hl - 8, zaun, { kollision: true, schatten: false }); // Eingang am Südende
+  for (let k = 0; k < 40; k++) {
+    // Bäume auf der Wiese zwischen Schule und Platz und rund um den Platz
+    const x = -50 - zufall() * 75, z = -10 + zufall() * 110;
+    if (x < hx + hb / 2 + 4 && x > hx - hb / 2 - 4 && z < hz + hl / 2 + 4 && z > hz - hl / 2 - 4) continue;
+    baeume.push([x, z, 0.9 + zufall() * 0.7]);
+  }
+
+  // --- Westen: Kleingärten ---
+  kleingaerten(b, zufall, baeume);
+
+  // --- Norden und Osten: geschwungene Hauptstraße ---
+  const strasse: [number, number][] = [[60, 150], [0, 135], [-60, 118], [-110, 92], [-145, 50], [-165, 0], [-175, -60], [-180, -150]];
+  for (let i = 0; i < strasse.length - 1; i++) {
+    const [ax, az] = strasse[i], [ex, ez] = strasse[i + 1];
+    const l = Math.hypot(ex - ax, ez - az) + 1.5;
+    const w = Math.atan2(ex - ax, ez - az);
+    const mx = (ax + ex) / 2, mz = (az + ez) / 2;
+    b.box(mx, 0, mz, 26, 0.02, l, 0xbdb8ae, { ...flach, drehung: w }); // Gehsteige
+    b.box(mx, 0, mz, 16, 0.03, l, 0x6a6d72, { ...flach, drehung: w }); // Fahrbahn
+    b.box(mx, 0, mz, 3.2, 0.035, l, 0x8d8a84, { ...flach, drehung: w }); // Gleiskörper der Straßenbahn
+    for (const s of [-0.75, 0.75]) {
+      const ox = Math.cos(w) * s, oz = -Math.sin(w) * s;
+      b.box(mx + ox, 0.035, mz + oz, 0.08, 0.02, l, 0xb7bcc0, { ...flach, drehung: w });
+    }
+  }
+  // Tankstelle mit Flugdach östlich der Straße
+  b.box(-160, 0, 118, 26, 0.02, 20, 0x9a978f, flach);
+  b.box(-160, 5, 118, 24, 0.8, 16, 0xf2f2ef, { kollision: false });
+  for (const [dx, dz] of [[-8, -4], [8, -4], [-8, 4], [8, 4]]) b.box(-160 + dx, 0, 118 + dz, 0.4, 5, 0.4, 0xd2d2cf);
+  b.box(-160, 0, 130, 14, 4, 6, 0xe8e6e0);
+  // Wohnblöcke jenseits der Straße
+  const bloecke: [number, number, number, number, number][] = [
+    [40, 175, 60, 14, 18], [-25, 165, 50, 14, 20], [-90, 150, 45, 16, 19],
+    [-150, 160, 40, 14, 21], [-205, 120, 14, 60, 20], [-210, 40, 14, 60, 18], [-210, -40, 14, 50, 22],
+  ];
+  bloecke.forEach(([x, z, w, t, h], i) => {
+    b.box(x, 0, z, w, h, t, i % 2 ? 0xe9e2d2 : 0xdcd4c4, { kollision: false });
+    b.box(x, h, z, w + 0.6, 2.4, t + 0.6, 0xb3563d, { kollision: false }); // rotes Dach (stilisiert)
+    for (let g = 1; g < h / 3.1; g++) b.box(x, g * 3.1 - 1.1, z, w + 0.04, 1.1, t + 0.04, 0x5f6b74, { kollision: false, schatten: false });
+  });
+
+  // --- Südosten: USZ Schmelz ---
+  b.box(-135, 0, -100, 110, 11, 70, 0xe3e3df, { kollision: false });
+  b.box(-135, 11, -100, 104, 0.6, 64, 0xc9cbca, { kollision: false });
+  for (let x = -180; x <= -95; x += 8) b.box(x, 11.6, -100, 4, 1.4, 56, 0xf4f4f2, { kollision: false }); // Sheddächer
+  b.box(-95, 0, -55, 40, 14, 22, 0xd6d8d8, { kollision: false });
+  for (let g = 1; g < 4; g++) b.box(-95, g * 3.4 - 1.2, -55, 40.05, 1.2, 22.05, 0x667480, { kollision: false, schatten: false });
+
+  // --- Südwesten: Kunstrasenplatz ---
+  b.box(105, 0, -110, 68, 0.03, 105, 0x3f6b3f, flach);
+  for (const [x, z, w, t] of [[105, -110, 64, 0.12], [105, -58, 64, 0.12], [105, -162, 64, 0.12], [73, -110, 0.12, 104], [137, -110, 0.12, 104]]) {
+    b.box(x, 0.032, z, w, 0.004, t, 0xf2f2ee, flach);
+  }
+
+  pflanzeBaeume(b, baeume);
 }
 
+/** Viele Kleingartenparzellen mit Häuschen, gezeichnet als Instanzen. */
+function kleingaerten(b: Bauer, zufall: () => number, baeume: [number, number, number][]) {
+  const haus = new THREE.BoxGeometry(1, 1, 1);
+  haus.translate(0, 0.5, 0);
+  const dach = new THREE.CylinderGeometry(1, 1, 1, 3, 1);
+  dach.rotateZ(Math.PI / 2); // dreieckiges Prisma, First entlang x
+  dach.rotateY(Math.PI / 2);
+  dach.scale(1, 0.5, 1);
+  const parzellen: [number, number][] = [];
+  for (let x = 60; x < 160; x += 13) {
+    for (let z = -15; z < 175; z += 15) {
+      if ((x - 60) % 39 === 26) continue; // Wege zwischen den Reihen
+      parzellen.push([x, z]);
+    }
+  }
+  const nH = parzellen.length;
+  const koerper = new THREE.InstancedMesh(haus, new THREE.MeshLambertMaterial({ color: 0xffffff }), nH);
+  const daecher = new THREE.InstancedMesh(dach, new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true }), nH);
+  const m = new THREE.Matrix4();
+  const wandF = [0xe8e2d6, 0xd9d4c8, 0xc8b8a0, 0xe2e0da, 0xb7c2c8];
+  const dachF = [0xb4553a, 0xc66b3d, 0x7a7f86, 0x9b4a35, 0x5d6168];
+  parzellen.forEach(([x, z], i) => {
+    const w = 3.5 + zufall() * 2, t = 4 + zufall() * 2, h = 2.4 + zufall() * 0.8;
+    const hxp = x + (zufall() - 0.5) * 5, hzp = z + (zufall() - 0.5) * 6;
+    m.compose(new THREE.Vector3(hxp, 0, hzp), new THREE.Quaternion(), new THREE.Vector3(w, h, t));
+    koerper.setMatrixAt(i, m);
+    koerper.setColorAt(i, new THREE.Color(wandF[i % wandF.length]));
+    m.compose(new THREE.Vector3(hxp, h + 0.45, hzp), new THREE.Quaternion(), new THREE.Vector3(w * 0.62, 1.8, t * 0.62));
+    daecher.setMatrixAt(i, m);
+    daecher.setColorAt(i, new THREE.Color(dachF[Math.floor(zufall() * dachF.length)]));
+    if (zufall() < 0.5) baeume.push([x + (zufall() - 0.5) * 9, z + (zufall() - 0.5) * 10, 0.5 + zufall() * 0.4]);
+  });
+  koerper.castShadow = daecher.castShadow = true;
+  b.gruppe.add(koerper, daecher);
+  // Hecken entlang der Parzellen
+  for (let x = 53.5; x < 160; x += 13) b.box(x, 0, 80, 0.8, 1.6, 190, b.mat(0x4f7340, { flatShading: true }), { kollision: x < 54 });
+}
+
+/** Bäume als zwei Instanz-Netze (Stamm, Krone), mit Kollision. */
+function pflanzeBaeume(b: Bauer, liste: [number, number, number][]) {
+  const stammGeo = new THREE.CylinderGeometry(0.18, 0.25, 2.6, 6);
+  stammGeo.translate(0, 1.3, 0);
+  const kroneGeo = new THREE.IcosahedronGeometry(2.1, 0);
+  kroneGeo.translate(0, 3.9, 0);
+  const staemme = new THREE.InstancedMesh(stammGeo, b.mat(0x7a5a3e), liste.length);
+  const kronen = new THREE.InstancedMesh(kroneGeo, new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true }), liste.length);
+  const gruen = [0x6f9a52, 0x5f8a48, 0x7fa65a, 0x557f44, 0x8aa35a];
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  liste.forEach(([x, z, s], i) => {
+    q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), i * 0.7);
+    m.compose(new THREE.Vector3(x, 0, z), q, new THREE.Vector3(s, s, s));
+    staemme.setMatrixAt(i, m);
+    m.compose(new THREE.Vector3(x, 0, z), q, new THREE.Vector3(s * (0.9 + (i % 3) * 0.15), s, s));
+    kronen.setMatrixAt(i, m);
+    kronen.setColorAt(i, new THREE.Color(gruen[i % gruen.length]));
+    b.kollisionZylinder(x, z, 0.3 * s, 3);
+  });
+  staemme.castShadow = kronen.castShadow = true;
+  b.gruppe.add(staemme, kronen);
+}
+
+/** Reproduzierbarer Zufall, damit die Welt bei jedem Laden gleich aussieht. */
+function pseudoZufall(saat: number): () => number {
+  let s = saat >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
 
 // ---------- Haupteingang (nach Bernhards Fotos) ----------
 // Gläsernes Vordach an vier Zugstangen, drei Doppeltüren aus Glas und Alu,

@@ -134,7 +134,7 @@ Nicht im Prototyp: weitere Geschosse, Karte, Figurenauswahl, Video.
 
 ## 10. Offene Punkte
 
-- **Nordrichtung und Lageplan:** gegen Orthofoto prüfen. Im Modell ist zwischen Turnsaal-Trakt und Hauptbau ein schmaler Gang mit offenen Flächen daneben; klären, was dort in Wirklichkeit ist.
+- **Nordrichtung und Lageplan:** nach Bernhards Luftbildern (18.11.2026) geklärt, unter der Annahme, dass die Senkrechtaufnahmen genordet sind: Der Haupteingang schaut nach Süden (−z im Modell), der Turnsaal-Trakt liegt im Norden (+z), +x ist Westen. Umgebung danach angelegt (Stadion im Süden, Hartplatz im Osten, Kleingärten im Westen, Hauptstraße im Nordosten, USZ im Südosten). Genaue Maße kommen später aus dem Orthofoto der Stadt Wien.
 - **Name im Abschlusscode:** ja oder nein? Mein Vorschlag: freiwilliges Kürzel.
 - **Google Sheet oder Excel:** Google Sheet empfehle ich wegen der Live-Anbindung. Geht das an deiner Schule, oder ist Microsoft 365 Pflicht? (Dann: Excel-Vorlage und CSV-Export ins Repository.)
 - **Ton:** Hintergrundgeräusche und Musik ja oder nein?

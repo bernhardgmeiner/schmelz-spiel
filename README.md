@@ -13,7 +13,9 @@
 
 Spielbar: Vorplatz mit Straße, Haupteingang mit Glasvordach, Eingangshalle und abgesenktes Atrium (nach Fotos, Maße geschätzt), 8 Beispielstationen (alle Aufgabentypen außer „Bild anklicken“ und ein Dialog), Punkte, Abzeichen, Speicherstand, Abschlusscode, Prüfseite, Deutsch/Englisch, Tastatur/Maus und Touch.
 
-Platzhalter, bis der Plan da ist: genaue Maße von Halle und Atrium, Obergeschosse, Vorplatz, Straße, Nachbarhäuser, Audioaufnahme (synthetische Stimme).
+Umgebung nach Luftbildern (Stadion, Hartplatz, Kleingärten, Hauptstraße, USZ), stilisiert und in groben Maßen. Eingang schaut nach Süden.
+
+Platzhalter, bis der Plan da ist: genaue Maße von Halle und Atrium, Obergeschosse, genaue Lage der Umgebung, Audioaufnahme (synthetische Stimme).
 
 ## Lokal starten
 
@@ -25,7 +27,9 @@ npm run dev
 
 Dann <http://localhost:5173> öffnen. Veröffentlichen: `npm run veroeffentlichen` (baut und lädt in den Zweig `gh-pages`).
 
-Online: <https://bernhardgmeiner.github.io/schmelz-spiel/> Ein bestimmtes Paket: `?paket=name`, ohne Angabe läuft `demo`. Codes prüfen: `pruefung.html`.
+Online: <https://bernhardgmeiner.github.io/schmelz-spiel/>
+
+Ein bestimmtes Paket: `?paket=name`, ohne Angabe läuft `demo`. Codes prüfen: `pruefung.html`.
 
 ## Ordner
 
